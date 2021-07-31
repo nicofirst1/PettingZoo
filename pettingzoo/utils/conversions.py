@@ -67,11 +67,7 @@ class to_parallel_wrapper(ParallelEnv):
         observations = {}
 
         for agent in self.aec_env.agents:
-            if agent != self.aec_env.agent_selection:
-                if self.dones[agent]:
-                    raise AssertionError(f"expected agent {agent} got done agent {self.aec_env.agent_selection}. Parallel enviornment wrapper expects all agent termination to happen only at the end of a cycle.")
-                else:
-                    raise AssertionError(f"expected agent {agent} got agent {self.aec_env.agent_selection}, Parallel environment wrapper expects agents to step in a cycle.")
+            assert agent == self.aec_env.agent_selection, f"expected agent {agent} got agent {self.aec_env.agent_selection}, agent order is nontrivial"
             obs, rew, done, info = self.aec_env.last()
             self.aec_env.step(actions[agent])
             for agent in self.aec_env.agents:
