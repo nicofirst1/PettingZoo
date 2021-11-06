@@ -16,6 +16,7 @@ def make_env(raw_env):
             env = wrappers.AssertOutOfBoundsWrapper(env)
         env = wrappers.OrderEnforcingWrapper(env)
         return env
+
     return env
 
 
@@ -66,9 +67,11 @@ class SimpleEnv(AECEnv):
                 self.action_spaces[agent.name] = spaces.Box(low=0, high=1, shape=(space_dim,))
             else:
                 self.action_spaces[agent.name] = spaces.Discrete(space_dim)
-            self.observation_spaces[agent.name] = spaces.Box(low=-np.float32(np.inf), high=+np.float32(np.inf), shape=(obs_dim,), dtype=np.float32)
+            self.observation_spaces[agent.name] = spaces.Box(low=-np.float32(np.inf), high=+np.float32(np.inf),
+                                                             shape=(obs_dim,), dtype=np.float32)
 
-        self.state_space = spaces.Box(low=-np.float32(np.inf), high=+np.float32(np.inf), shape=(state_dim,), dtype=np.float32)
+        self.state_space = spaces.Box(low=-np.float32(np.inf), high=+np.float32(np.inf), shape=(state_dim,),
+                                      dtype=np.float32)
 
         self.steps = 0
 
@@ -89,7 +92,9 @@ class SimpleEnv(AECEnv):
         return self.scenario.observation(self.world.agents[self._index_map[agent]], self.world).astype(np.float32)
 
     def state(self):
-        states = tuple(self.scenario.observation(self.world.agents[self._index_map[agent]], self.world).astype(np.float32) for agent in self.possible_agents)
+        states = tuple(
+            self.scenario.observation(self.world.agents[self._index_map[agent]], self.world).astype(np.float32) for
+            agent in self.possible_agents)
         return np.concatenate(states, axis=None)
 
     def reset(self):
@@ -204,7 +209,8 @@ class SimpleEnv(AECEnv):
         from . import rendering
 
         if self.viewer is None:
-            self.viewer = rendering.Viewer(700, 700)
+            visible = True if mode == "human" else False
+            self.viewer = rendering.Viewer(700, 700, visible=visible)
 
         # create rendering geometry
         if self.render_geoms is None:

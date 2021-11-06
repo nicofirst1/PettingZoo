@@ -48,13 +48,13 @@ def get_display(spec):
 
 
 class Viewer:
-    def __init__(self, width, height, display=None):
+    def __init__(self, width, height, display=None, visible=True):
         display = get_display(display)
 
         self.width = width
         self.height = height
 
-        self.window = pyglet.window.Window(width=width, height=height, display=display)
+        self.window = pyglet.window.Window(width=width, height=height, display=display, visible=visible)
         self.window.on_close = self.window_closed_by_user
         self.geoms = []
         self.onetime_geoms = []
