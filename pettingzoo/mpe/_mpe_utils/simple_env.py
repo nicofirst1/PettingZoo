@@ -208,10 +208,6 @@ class SimpleEnv(AECEnv):
     def render(self, mode='human'):
         from . import rendering
 
-        if self.viewer is None:
-            visible = True if mode == "human" else False
-            self.viewer = rendering.Viewer(700, 700, visible=visible)
-
         # create rendering geometry
         if self.render_geoms is None:
             # import rendering only if we need it (and don't import for headless machines)
