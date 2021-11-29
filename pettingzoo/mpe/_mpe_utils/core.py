@@ -15,6 +15,8 @@ class AgentState(EntityState):  # state of agents (including communication and i
         # communication utterance
         self.c = None
 
+    def __repr__(self):
+        return f"\n\tPosition : {self.p_pos}\n\tVelocity: {self.p_vel}\n\tCommunication : {self.c}\n"
 
 class Action:  # action of the agent
     def __init__(self):
