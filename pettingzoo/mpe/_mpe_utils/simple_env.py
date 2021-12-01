@@ -229,6 +229,15 @@ class SimpleEnv(AECEnv):
                 self.render_geoms.append(geom)
                 self.render_geoms_xform.append(xform)
 
+            if hasattr(self.world,"borders"):
+                for border in self.world.borders:
+                    geom = rendering.make_polyline((border.start, border.end))
+                    xform = rendering.Transform()
+                    geom.set_color(*entity.color[:3])
+                    geom.add_attr(xform)
+                    self.render_geoms.append(geom)
+                    self.render_geoms_xform.append(xform)
+
             # add geoms to viewer
             self.viewer.geoms = []
             for geom in self.render_geoms:

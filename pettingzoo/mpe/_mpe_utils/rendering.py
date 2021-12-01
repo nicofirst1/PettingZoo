@@ -367,7 +367,7 @@ class PolyLine(Geom):
         Geom.__init__(self)
         self.v = v
         self.close = close
-        self.linewidth = LineWidth(1)
+        self.linewidth = LineWidth(5)
         self.add_attr(self.linewidth)
 
     def render1(self):
