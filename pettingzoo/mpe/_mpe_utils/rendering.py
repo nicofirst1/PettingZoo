@@ -113,7 +113,6 @@ class Viewer:
         for geom in self.text_lines:
             geom.render()
 
-        arr = None
         buffer = pyglet.image.get_buffer_manager().get_color_buffer()
         image_data = buffer.get_image_data()
         arr = np.fromstring(image_data.get_data(), dtype=np.uint8, sep='')
