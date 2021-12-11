@@ -135,7 +135,11 @@ class World:  # multi-agent world
     # gather agent action forces
     def apply_action_force(self, p_force):
         # set applied forces
-        for i, agent in enumerate(self.agents):
+        for i, agent in enumerate(self.entities):
+
+            if not isinstance(agent,Agent):
+                continue
+
             if agent.movable:
                 noise = (
                     np.random.randn(*agent.action.u.shape) * agent.u_noise
@@ -177,12 +181,12 @@ class World:  # multi-agent world
                 )
                 if speed > entity.max_speed:
                     entity.state.p_vel = (
-                        entity.state.p_vel
-                        / np.sqrt(
-                            np.square(entity.state.p_vel[0])
-                            + np.square(entity.state.p_vel[1])
-                        )
-                        * entity.max_speed
+                            entity.state.p_vel
+                            / np.sqrt(
+                        np.square(entity.state.p_vel[0])
+                        + np.square(entity.state.p_vel[1])
+                    )
+                            * entity.max_speed
                     )
             entity.state.p_pos += entity.state.p_vel * self.dt
 
@@ -204,11 +208,14 @@ class World:  # multi-agent world
             return [None, None]  # not a collider
         if entity_a is entity_b:
             return [None, None]  # don't collide against itself
+        if (not entity_a.movable) and (not entity_b.movable):
+            return [None, None]  # don't apply force to unmovable objs
+
         # compute actual distance between entities
 
         if hasattr(entity_a, "start"):
             closest_point = self.get_closest_point_to_line(entity_a, entity_b)
-            delta_pos = closest_point - entity_b.state.p_pos
+            delta_pos = entity_b.state.p_pos - closest_point
 
         elif hasattr(entity_b, "start"):
             closest_point = self.get_closest_point_to_line(entity_b, entity_a)
@@ -226,7 +233,7 @@ class World:  # multi-agent world
         penetration = np.logaddexp(0, -(dist - dist_min) / k) * k
         force = self.contact_force * delta_pos / dist * penetration
         force_a = +force if entity_a.movable else None
-        force_b = -force if entity_b.movable else None
+        force_b = +force if entity_b.movable else None
         return [force_a, force_b]
 
     @staticmethod
