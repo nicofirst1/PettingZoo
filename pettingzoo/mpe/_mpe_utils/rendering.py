@@ -336,8 +336,8 @@ def make_polygon(v, filled=True):
         return PolyLine(v, True)
 
 
-def make_polyline(v):
-    return PolyLine(v, False)
+def make_polyline(v, linewidth=0.2):
+    return PolyLine(v, False, linewidth=linewidth)
 
 
 def make_capsule(length, width):
@@ -363,11 +363,11 @@ class Compound(Geom):
 
 
 class PolyLine(Geom):
-    def __init__(self, v, close):
+    def __init__(self, v, close, linewidth=5):
         Geom.__init__(self)
         self.v = v
         self.close = close
-        self.linewidth = LineWidth(5)
+        self.linewidth = LineWidth(linewidth)
         self.add_attr(self.linewidth)
 
     def render1(self):
