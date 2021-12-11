@@ -205,7 +205,7 @@ class SimpleEnv(AECEnv):
         self._cumulative_rewards[cur_agent] = 0
         self._accumulate_rewards()
 
-    def render(self, mode='human'):
+    def render(self):
         from . import rendering
 
         # create rendering geometry
@@ -269,15 +269,11 @@ class SimpleEnv(AECEnv):
         for entity, geom in self.color_geom:
             geom.set_color(*entity.color[:3])
 
-        # update bounds to center around agent
-        all_poses = [entity.state.p_pos for entity in self.world.entities]
-        cam_range = np.max(np.abs(np.array(all_poses))) + 1
-        self.viewer.set_max_size(cam_range)
         # update geometry positions
         for e, entity in enumerate(self.world.entities):
             self.render_geoms_xform[e].set_translation(*entity.state.p_pos)
         # render to display or array
-        return self.viewer.render(return_rgb_array=mode == 'rgb_array')
+        return self.viewer.render()
 
     # reset rendering assets
     def _reset_render(self):
