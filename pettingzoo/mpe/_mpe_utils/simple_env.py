@@ -103,6 +103,7 @@ class SimpleEnv(AECEnv):
         self.rewards = {name: 0. for name in self.agents}
         self._cumulative_rewards = {name: 0. for name in self.agents}
         self.dones = {name: False for name in self.agents}
+        self.dones["__all__"] = False
         self.infos = {name: {} for name in self.agents}
 
         self._reset_render()
@@ -194,10 +195,7 @@ class SimpleEnv(AECEnv):
 
         if next_idx == 0:
             self._execute_world_step()
-            self.steps += 1
-            if self.steps >= self.max_cycles:
-                for a in self.agents:
-                    self.dones[a] = True
+
         else:
             self._clear_rewards()
 
