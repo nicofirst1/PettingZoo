@@ -35,7 +35,7 @@ class SimpleEnv(AECEnv):
         self.color_entities = color_entities
         self.color_geom = []
 
-        self.scenario.reset_world(self.world)
+        self.scenario.reset_world(self.world, self.np_random)
 
         self.agents = [agent.name for agent in self.world.agents]
         self.possible_agents = self.agents[:]
@@ -97,7 +97,7 @@ class SimpleEnv(AECEnv):
         return np.concatenate(states, axis=None)
 
     def reset(self):
-        self.scenario.reset_world(self.world)
+        self.scenario.reset_world(self.world, self.np_random)
 
         self.agents = self.possible_agents[:]
         self.rewards = {name: 0. for name in self.agents}
