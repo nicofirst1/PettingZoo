@@ -1,6 +1,7 @@
 import numpy as np
 from gym import spaces
 from gym.utils import seeding
+from src.env import Scenario
 
 from pettingzoo import AECEnv
 from pettingzoo.utils import wrappers
@@ -21,9 +22,33 @@ def make_env(raw_env):
 
 
 class SimpleEnv(AECEnv):
-    def __init__(self, scenario, world, max_cycles, continuous_actions=False, local_ratio=None, color_entities=None):
+    def __init__(
+            self,
+            scenario: Scenario,
+            world,
+            max_cycles: int,
+            continuous_actions: bool = False,
+            local_ratio=None,
+            color_entities=None):
+        """SimpleEnv class.
+
+        Simple env
+        Parameters
+        ----------
+        scenario :
+        world : world from the petting zoo multi particle environment core.py
+        max_cycles : maximum size of the word, used in word initialization
+        continuous_actions : TYPE, optional
+        local_ratio : TYPE, optional
+        color_entities : TYPE, optional
+        Returns
+        -------
+        None.
+
+        """
         super().__init__()
 
+        self.seed()
 
         self.metadata = {'render.modes': ['human', 'rgb_array']}
 
@@ -39,7 +64,8 @@ class SimpleEnv(AECEnv):
 
         self.agents = [agent.name for agent in self.world.agents]
         self.possible_agents = self.agents[:]
-        self._index_map = {agent.name: idx for idx, agent in enumerate(self.world.agents)}
+        self._index_map = {agent.name: idx for idx,
+                           agent in enumerate(self.world.agents)}
 
         self._agent_selector = agent_selector(self.agents)
 
@@ -63,7 +89,8 @@ class SimpleEnv(AECEnv):
             obs_dim = len(self.scenario.observation(agent, self.world))
             state_dim += obs_dim
             if self.continuous_actions:
-                self.action_spaces[agent.name] = spaces.Box(low=0, high=1, shape=(space_dim,))
+                self.action_spaces[agent.name] = spaces.Box(
+                    low=0, high=1, shape=(space_dim,))
             else:
                 self.action_spaces[agent.name] = spaces.Discrete(space_dim)
             self.observation_spaces[agent.name] = spaces.Box(low=-np.float32(np.inf), high=+np.float32(np.inf),
@@ -103,7 +130,6 @@ class SimpleEnv(AECEnv):
         self.rewards = {name: 0. for name in self.agents}
         self._cumulative_rewards = {name: 0. for name in self.agents}
         self.dones = {name: False for name in self.agents}
-        self.dones["__all__"] = False
         self.infos = {name: {} for name in self.agents}
 
         self._reset_render()
@@ -128,8 +154,9 @@ class SimpleEnv(AECEnv):
                     action //= mdim
             if not agent.silent:
                 scenario_action.append(action)
-            self._set_action(scenario_action, agent, self.action_spaces[agent.name])
-
+            self._set_action(scenario_action, agent,
+                             self.action_spaces[agent.name])
+        # execute the joint actions
         self.world.step()
 
         global_reward = 0.
@@ -139,7 +166,8 @@ class SimpleEnv(AECEnv):
         for agent in self.world.agents:
             agent_reward = float(self.scenario.reward(agent, self.world))
             if self.local_ratio is not None:
-                reward = global_reward * (1 - self.local_ratio) + agent_reward * self.local_ratio
+                reward = global_reward * \
+                    (1 - self.local_ratio) + agent_reward * self.local_ratio
             else:
                 reward = agent_reward
 
@@ -147,6 +175,21 @@ class SimpleEnv(AECEnv):
 
     # set env action for a particular agent
     def _set_action(self, action, agent, action_space, time=None):
+        """_set_action method.
+
+        Transform the index of action in an actual movement in the environment
+        for the given agent
+        Parameters
+        ----------
+        action : int
+        agent : PettingZoo.mpe._mpe_utils.core.Agent
+        action_space : gym.spaces
+        time : TYPE, optional
+        Returns
+        -------
+        None.
+
+        """
         agent.action.u = np.zeros(self.world.dim_p)
         agent.action.c = np.zeros(self.world.dim_c)
 
@@ -186,19 +229,25 @@ class SimpleEnv(AECEnv):
     def step(self, action):
         if self.dones[self.agent_selection]:
             return self._was_done_step(action)
+        # agent_selection is the name of current agent (e.g. "agent_0")
         cur_agent = self.agent_selection
+        # map agent names to their id
         current_idx = self._index_map[self.agent_selection]
         next_idx = (current_idx + 1) % self.num_agents
         self.agent_selection = self._agent_selector.next()
 
         self.current_actions[current_idx] = action
 
+        # by the definition of next_id, if it is zero then we have evaluated
+        # all the agents
         if next_idx == 0:
             self._execute_world_step()
 
         else:
+            # set the rewards of all the agents to 0
             self._clear_rewards()
 
+        # fix : why do we reset the cumulative reward at each step?
         self._cumulative_rewards[cur_agent] = 0
         self._accumulate_rewards()
 
@@ -228,7 +277,8 @@ class SimpleEnv(AECEnv):
 
             if hasattr(self.world, "borders"):
                 for border in self.world.borders:
-                    geom = rendering.make_polyline((border.start, border.end), linewidth=border.linewidth)
+                    geom = rendering.make_polyline(
+                        (border.start, border.end), linewidth=border.linewidth)
                     xform = rendering.Transform()
                     geom.set_color(*border.color[:3])
                     geom.add_attr(xform)
@@ -255,7 +305,8 @@ class SimpleEnv(AECEnv):
             if np.all(other.state.c == 0):
                 word = '_'
             elif self.continuous_actions:
-                word = '[' + ",".join([f"{comm:.2f}" for comm in other.state.c]) + "]"
+                word = '[' + \
+                    ",".join([f"{comm:.2f}" for comm in other.state.c]) + "]"
             else:
                 word = alphabet[np.argmax(other.state.c)]
 
